@@ -25,7 +25,7 @@ export function Calendar({ className = "" }: CalendarProps) {
   // Fetch events function
   const fetchEvents = useCallback(async () => {
     try {
-      console.log("🔄 Fetching calendar events...");
+    
       const response = await fetch("/api/calendar/events");
 
       if (!response.ok) {
@@ -38,7 +38,7 @@ export function Calendar({ className = "" }: CalendarProps) {
         setEvents(data.events);
         setError(null);
         setLastUpdate(new Date());
-        console.log(`✅ Updated calendar with ${data.events.length} events`);
+        
       } else {
         throw new Error(data.error || "Failed to fetch events");
       }
@@ -50,8 +50,29 @@ export function Calendar({ className = "" }: CalendarProps) {
     }
   }, []);
 
-  // Smart polling hook
-  const { triggerAction, isActive } = useSmartPolling(fetchEvents, 30000);
+  // Smart polling hook - now calls sync endpoint for efficiency!
+  const { triggerAction, isActive } = useSmartPolling(async () => {
+    try {
+      
+      const response = await fetch("/api/calendar/sync");
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.success && data.hasChanges) {
+          
+          // Refresh full events when changes are detected
+          await fetchEvents();
+        } else {
+        
+        }
+      }
+    } catch (err) {
+      console.error("❌ Error during smart polling:", err);
+      // Fall back to full refresh on error
+      await fetchEvents();
+    }
+  }, 30000);
 
   // Initial load
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { setupWebhook } from '@/lib/google-calendar';
 import { google } from 'googleapis';
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
@@ -40,6 +41,17 @@ export async function GET(request: NextRequest) {
         tokenExpiry: new Date(tokens.expiry_date!),
       },
     });
+
+    console.log('✅ User authenticated successfully:', user.email);
+
+    // Set up webhook subscription for real-time updates
+    try {
+      await setupWebhook(user.id);
+      console.log('🔗 Webhook set up successfully for user:', user.email);
+    } catch (webhookError) {
+      console.warn('⚠️ Webhook setup failed (non-blocking):', webhookError);
+      // Don't fail the auth flow if webhook setup fails
+    }
 
     // Creating session token
     const sessionToken = jwt.sign(
