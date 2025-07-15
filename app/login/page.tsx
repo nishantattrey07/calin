@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { Suspense, useState } from "react";
 
 function LoginContent() {
   const searchParams = useSearchParams();
@@ -32,12 +32,12 @@ function LoginContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           {/* Logo and Brand */}
           <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-gray-900 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
               <svg
                 className="w-8 h-8 text-white"
                 fill="currentColor"
@@ -52,22 +52,35 @@ function LoginContent() {
             </div>
           </div>
 
-          <h2 className="text-center text-3xl font-semibold text-gray-900">
+          <h2 className="text-center text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
             Sign in to Calin
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-400">
             Connect your Google Calendar to get started
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl p-4">
             <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
+              <div className="w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mr-3">
+                <svg
+                  className="w-4 h-4 text-red-600 dark:text-red-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                   Authentication Error
                 </h3>
-                <div className="mt-2 text-sm text-red-700">
+                <div className="mt-2 text-sm text-red-700 dark:text-red-300">
                   {getErrorMessage(error)}
                 </div>
               </div>
@@ -79,14 +92,14 @@ function LoginContent() {
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className={`group relative w-full flex justify-center py-4 px-6 border border-gray-200 text-sm font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md ${
+            className={`group relative w-full flex justify-center py-4 px-6 border border-slate-200 dark:border-slate-600 text-sm font-medium rounded-xl text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${
               isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
             {isLoading ? (
               <div className="flex items-center">
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600"
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-slate-600 dark:text-slate-400"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -134,7 +147,7 @@ function LoginContent() {
         </div>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             By signing in, you agree to allow access to your Google Calendar
           </p>
         </div>

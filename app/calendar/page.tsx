@@ -95,9 +95,30 @@ export default function CalendarPage() {
 
   // Event handlers
   const handleSignOut = async () => {
+    try {
+      console.log("🔄 Signing out...");
+
+      // Call logout API to cleanup webhooks
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        console.log("✅ Logout successful, redirecting to home page");
+      } else {
+        console.warn("⚠️ Logout API failed, but proceeding with redirect");
+      }
+    } catch (error) {
+      console.error("❌ Error during logout:", error);
+      // Continue with logout even if API fails
+    }
+
+    // Clear session cookie (backup)
     document.cookie =
       "session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    router.push("/login");
+
+    // Redirect to landing page instead of login
+    router.push("/");
   };
 
   const handleEventSave = async (eventData: CalendarEvent) => {
@@ -214,8 +235,8 @@ export default function CalendarPage() {
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center space-x-3 text-gray-500">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-slate-600 dark:text-slate-400">
           <svg
             className="animate-spin w-6 h-6"
             fill="none"
@@ -237,17 +258,30 @@ export default function CalendarPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <svg
+              className="w-8 h-8 text-white"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
             Authentication Required
           </h1>
-          <p className="text-gray-600 mb-6">
-            Please sign in to view your calendar.
+          <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+            Please sign in to access your calendar and manage your events.
           </p>
           <button
             onClick={() => router.push("/login")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Go to Login
           </button>
@@ -257,14 +291,14 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
       {/* Header */}
-      <header className="border-b border-gray-100 sticky top-0 z-40 backdrop-blur-xl bg-white/95">
+      <header className="border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-5">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                   <svg
                     className="w-6 h-6 text-white"
                     fill="currentColor"
@@ -277,26 +311,26 @@ export default function CalendarPage() {
                     />
                   </svg>
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent tracking-tight">
                   Calin
                 </h1>
               </div>
               <div className="hidden sm:block">
-                <span className="text-sm text-gray-500 font-medium">
+                <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                   Welcome back{userEmail && `, ${userEmail.split("@")[0]}`}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3 text-sm text-gray-700 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+              <div className="flex items-center space-x-3 text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-2 rounded-full border border-emerald-200 dark:border-emerald-800">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                 <span className="font-medium">Live sync</span>
               </div>
 
               <button
                 onClick={handleSignOut}
-                className="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:bg-gray-50 p-2.5 rounded-full"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800 p-2.5 rounded-full"
                 title="Sign Out"
               >
                 <svg
@@ -320,14 +354,14 @@ export default function CalendarPage() {
 
       {/* Tab Navigation */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="border-b border-gray-100">
+        <div className="border-b border-slate-200/50 dark:border-slate-700/50">
           <nav className="-mb-px flex space-x-12 pt-8">
             <button
               onClick={() => setActiveTab("calendar")}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
                 activeTab === "calendar"
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -352,8 +386,8 @@ export default function CalendarPage() {
               onClick={() => setActiveTab("events")}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
                 activeTab === "events"
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -381,7 +415,7 @@ export default function CalendarPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="flex items-center space-x-3 text-gray-500">
+            <div className="flex items-center space-x-3 text-slate-600 dark:text-slate-400">
               <svg
                 className="animate-spin w-6 h-6"
                 fill="none"

@@ -172,15 +172,15 @@ export function EventModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-100">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-slate-200/50 dark:border-slate-700/50">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50 rounded-t-2xl">
+        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-slate-50/80 to-slate-100/80 dark:from-slate-800/80 dark:to-slate-700/80 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                 <svg
-                  className="w-5 h-5 text-gray-600"
+                  className="w-5 h-5 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -191,14 +191,14 @@ export function EventModal({
                   />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
                 {event ? "Edit Event" : "Create New Event"}
               </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-all duration-200 hover:bg-gray-100 p-2 rounded-full"
+              className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-700 p-2 rounded-full"
             >
               <svg
                 className="w-6 h-6"
@@ -220,10 +220,10 @@ export function EventModal({
         {/* Content */}
         <div className="p-6 space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+            <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center space-x-3">
+              <div className="w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 text-red-600"
+                  className="w-4 h-4 text-red-600 dark:text-red-400"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -234,16 +234,18 @@ export function EventModal({
                   />
                 </svg>
               </div>
-              <div className="text-sm text-red-700 font-medium">{error}</div>
+              <div className="text-sm text-red-700 dark:text-red-300 font-medium">
+                {error}
+              </div>
             </div>
           )}
 
           {/* Read-only warning for system events */}
           {event && !isEventEditable(event) && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-xl p-4 flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-blue-600 dark:text-blue-400"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -254,7 +256,7 @@ export function EventModal({
                   />
                 </svg>
               </div>
-              <div className="text-sm text-blue-700 font-medium">
+              <div className="text-sm text-blue-700 dark:text-blue-300 font-medium">
                 {getEventTypeMessage(event)}
               </div>
             </div>
@@ -264,7 +266,7 @@ export function EventModal({
           <div>
             <label
               htmlFor="summary"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
               Event Title *
             </label>
@@ -275,10 +277,10 @@ export function EventModal({
               value={formData.summary}
               onChange={handleInputChange}
               disabled={!!(event && !isEventEditable(event))}
-              className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 ${
+              className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
                 event && !isEventEditable(event)
-                  ? "bg-gray-50 text-gray-500 cursor-not-allowed"
-                  : "text-gray-900 bg-white"
+                  ? "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  : "text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800"
               }`}
               placeholder="Enter event title"
             />
@@ -289,7 +291,7 @@ export function EventModal({
             <div>
               <label
                 htmlFor="start"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
               >
                 Start Time *
               </label>
@@ -300,17 +302,17 @@ export function EventModal({
                 value={formData.start}
                 onChange={handleInputChange}
                 disabled={!!(event && !isEventEditable(event))}
-                className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 ${
+                className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
                   event && !isEventEditable(event)
-                    ? "bg-gray-50 text-gray-500 cursor-not-allowed"
-                    : "text-gray-900 bg-white"
+                    ? "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    : "text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800"
                 }`}
               />
             </div>
             <div>
               <label
                 htmlFor="end"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
               >
                 End Time *
               </label>
@@ -321,10 +323,10 @@ export function EventModal({
                 value={formData.end}
                 onChange={handleInputChange}
                 disabled={!!(event && !isEventEditable(event))}
-                className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 ${
+                className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
                   event && !isEventEditable(event)
-                    ? "bg-gray-50 text-gray-500 cursor-not-allowed"
-                    : "text-gray-900 bg-white"
+                    ? "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    : "text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800"
                 }`}
               />
             </div>
@@ -334,7 +336,7 @@ export function EventModal({
           <div>
             <label
               htmlFor="location"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
               Location
             </label>
@@ -345,10 +347,10 @@ export function EventModal({
               value={formData.location || ""}
               onChange={handleInputChange}
               disabled={!!(event && !isEventEditable(event))}
-              className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 ${
+              className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${
                 event && !isEventEditable(event)
-                  ? "bg-gray-50 text-gray-500 cursor-not-allowed"
-                  : "text-gray-900 bg-white"
+                  ? "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  : "text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800"
               }`}
               placeholder="Add location"
             />
@@ -358,7 +360,7 @@ export function EventModal({
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
               Description
             </label>
@@ -369,10 +371,10 @@ export function EventModal({
               onChange={handleInputChange}
               disabled={!!(event && !isEventEditable(event))}
               rows={3}
-              className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all duration-200 resize-none ${
+              className={`w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 resize-none ${
                 event && !isEventEditable(event)
-                  ? "bg-gray-50 text-gray-500 cursor-not-allowed"
-                  : "text-gray-900 bg-white"
+                  ? "bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                  : "text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800"
               }`}
               placeholder="Add description"
             />
@@ -380,14 +382,14 @@ export function EventModal({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 flex items-center justify-between bg-gray-50 rounded-b-2xl">
+        <div className="p-6 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl">
           <div>
             {event && onDelete && isEventDeletable(event) && (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={deleteLoading}
-                className="px-6 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 font-medium border border-red-200 hover:border-red-300 flex items-center space-x-2"
+                className="px-6 py-3 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-all duration-200 disabled:opacity-50 font-medium border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 flex items-center space-x-2"
               >
                 {deleteLoading && (
                   <svg
@@ -408,7 +410,7 @@ export function EventModal({
               </button>
             )}
             {event && !isEventDeletable(event) && (
-              <div className="text-xs text-gray-500 italic">
+              <div className="text-xs text-slate-500 dark:text-slate-400 italic">
                 System events cannot be deleted
               </div>
             )}
@@ -418,7 +420,7 @@ export function EventModal({
               type="button"
               onClick={onClose}
               disabled={loading || deleteLoading}
-              className="px-6 py-3 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 disabled:opacity-50 font-medium"
+              className="px-6 py-3 text-slate-600 dark:text-slate-300 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 disabled:opacity-50 font-medium border border-slate-300 dark:border-slate-600"
             >
               {event && !isEventEditable(event) ? "Close" : "Cancel"}
             </button>
@@ -427,7 +429,7 @@ export function EventModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={loading}
-                className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 flex items-center space-x-2 font-medium"
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 flex items-center space-x-2 font-medium shadow-lg hover:shadow-xl"
               >
                 {loading && (
                   <svg
