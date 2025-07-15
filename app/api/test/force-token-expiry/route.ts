@@ -1,4 +1,4 @@
-import { fetchAllEvents } from '@/lib/google-calendar';
+import { prisma } from '@/lib/db';
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -15,21 +15,27 @@ export async function GET(request: NextRequest) {
     const decoded = jwt.verify(sessionToken, process.env.JWT_SECRET!) as { userId: string; email: string };
     const userId = decoded.userId;
 
-    // Use our beautiful google-calendar function!
-    const events = await fetchAllEvents(userId);
+    // Force token expiry by setting it to 1 hour ago
+    const expiredTime = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
 
-    console.log(`📅 Fetched ${events.length} events successfully`);
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        tokenExpiry: expiredTime
+      }
+    });
 
     return NextResponse.json({ 
       success: true, 
-      events: events
+      message: 'Token expiry forced - token is now expired',
+      expiredAt: expiredTime
     });
 
   } catch (error) {
-    console.error('❌ Calendar events fetch failed:', error);
+    console.error('❌ Force expiry failed:', error);
     
     return NextResponse.json({ 
-      error: 'Failed to fetch calendar events',
+      error: 'Force expiry failed',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

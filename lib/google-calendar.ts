@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { prisma } from './db';
+import { CalendarEvent } from './types';
 
 
 const oauth2Client = new google.auth.OAuth2(
@@ -10,18 +11,6 @@ const oauth2Client = new google.auth.OAuth2(
 
 
 const calendar = google.calendar({ version: 'v3' });
-
-export interface CalendarEvent {
-  id: string;
-  summary: string;
-  start: string;
-  end: string;
-  description?: string | null;
-  location?: string | null;
-  etag?: string | null;
-  status?: string | null;
-  updated?: string | null;
-}
 
 
 export async function setupOAuthClient(userId: string) {
@@ -107,6 +96,9 @@ export async function fetchAllEvents(userId: string): Promise<CalendarEvent[]> {
       etag: event.etag,
       status: event.status,
       updated: event.updated,
+      eventType: event.eventType,
+      visibility: event.visibility,
+      source: event.source,
     }));
   } catch (error) {
     console.error('❌ Error fetching events:', error);
@@ -156,6 +148,9 @@ export async function syncCalendarEvents(userId: string): Promise<{ events: Cale
           etag: event.etag,
           status: event.status,
           updated: event.updated,
+          eventType: event.eventType,
+          visibility: event.visibility,
+          source: event.source,
         })));
       }
 
@@ -194,7 +189,26 @@ export async function syncCalendarEvents(userId: string): Promise<{ events: Cale
 
 
 export async function setupWebhook(userId: string): Promise<void> {
+  console.log('🔧 Setting up webhook for user:', userId);
   
+  // 🆕 CLEANUP: Remove existing webhooks for this user
+  const existingWebhooks = await prisma.webhook.findMany({
+    where: { userId }
+  });
+  
+  // Stop and delete existing webhooks
+  for (const webhook of existingWebhooks) {
+    try {
+      await stopWebhook(webhook.channelId, webhook.resourceId);
+      console.log('🧹 Cleaned up old webhook:', webhook.channelId);
+    } catch (error) {
+      console.warn('⚠️ Failed to stop old webhook:', webhook.channelId, error);
+      // Force delete from DB even if Google call fails
+      await prisma.webhook.delete({
+        where: { id: webhook.id }
+      }).catch(() => {}); // Ignore deletion errors
+    }
+  }
   
   const authClient = await setupOAuthClient(userId);
   
@@ -223,8 +237,9 @@ export async function setupWebhook(userId: string): Promise<void> {
       }
     });
     
+    console.log('✅ New webhook created:', channelId);
   } catch (error) {
-    console.error(' Webhook setup failed:', error);
+    console.error('❌ Webhook setup failed:', error);
     throw error;
   }
 }
@@ -299,6 +314,35 @@ export async function updateEvent(userId: string, eventId: string, eventData: Pa
   const authClient = await setupOAuthClient(userId);
   
   try {
+    // First, try to get the event to check if it's editable
+    const eventResponse = await calendar.events.get({
+      auth: authClient,
+      calendarId: 'primary',
+      eventId: eventId,
+    });
+
+    const existingEvent = eventResponse.data;
+    
+    // Check if this is a birthday or system event that cannot be updated
+    if (existingEvent.eventType === 'birthday') {
+      throw new Error('Cannot update birthday events. These events are managed by Google and cannot be modified.');
+    }
+    
+    // Check for birthday events based on source properties
+    if (existingEvent.source?.title?.toLowerCase()?.includes('birthday')) {
+      throw new Error('Cannot update birthday events. These events are managed by Google and cannot be modified.');
+    }
+    
+    // Check for Google+ sourced events (usually system events)
+    if (existingEvent.source?.url?.includes('plus.google.com')) {
+      throw new Error('Cannot update system events. These events are managed by Google and cannot be modified.');
+    }
+    
+    // Check if the event is read-only
+    if (existingEvent.status === 'cancelled') {
+      throw new Error('Cannot update cancelled events.');
+    }
+
     const response = await calendar.events.update({
       auth: authClient,
       calendarId: 'primary',
@@ -328,8 +372,28 @@ export async function updateEvent(userId: string, eventId: string, eventData: Pa
       etag: event.etag,
       status: event.status,
       updated: event.updated,
+      eventType: event.eventType,
+      visibility: event.visibility,
+      source: event.source,
     };
-  } catch (error) {
+  } catch (error: unknown) {
+    // Handle specific Google Calendar API errors for updates
+    const apiError = error as { code?: number; message?: string };
+    
+    if (apiError.code === 400) {
+      if (apiError.message?.includes('birthday') || apiError.message?.includes('not valid for this event type')) {
+        throw new Error('Cannot update birthday or system events. These events are managed by Google.');
+      }
+    }
+    
+    if (apiError.code === 403) {
+      throw new Error('You do not have permission to update this event.');
+    }
+    
+    if (apiError.code === 404) {
+      throw new Error('Event not found or has been deleted.');
+    }
+    
     console.error('Error updating event:', error);
     throw error;
   }
@@ -341,13 +405,63 @@ export async function deleteEvent(userId: string, eventId: string): Promise<void
   const authClient = await setupOAuthClient(userId);
   
   try {
+    // First, try to get the event to check if it's deletable
+    const eventResponse = await calendar.events.get({
+      auth: authClient,
+      calendarId: 'primary',
+      eventId: eventId,
+    });
+
+    const event = eventResponse.data;
+    
+    // Check if this is a birthday or system event that cannot be deleted
+    if (event.eventType === 'birthday') {
+      throw new Error('Cannot delete birthday events. These events are managed by Google and cannot be removed.');
+    }
+    
+    // Check for birthday events based on source properties
+    if (event.source?.title?.toLowerCase()?.includes('birthday')) {
+      throw new Error('Cannot delete birthday events. These events are managed by Google and cannot be removed.');
+    }
+    
+    // Check for Google+ sourced events (usually system events)
+    if (event.source?.url?.includes('plus.google.com')) {
+      throw new Error('Cannot delete system events. These events are managed by Google and cannot be removed.');
+    }
+    
+    // Check if the event is read-only
+    if (event.status === 'cancelled') {
+      throw new Error('Event is already cancelled');
+    }
+
     await calendar.events.delete({
       auth: authClient,
       calendarId: 'primary',
       eventId: eventId,
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
+    // Handle specific Google Calendar API errors
+    const apiError = error as { code?: number; message?: string };
+    
+    if (apiError.code === 400) {
+      if (apiError.message?.includes('birthday') || apiError.message?.includes('not valid for this event type')) {
+        throw new Error('Cannot delete birthday or system events. These events are managed by Google.');
+      }
+      if (apiError.message?.includes('deleted')) {
+        throw new Error('Event has already been deleted.');
+      }
+    }
+    
+    if (apiError.code === 403) {
+      throw new Error('You do not have permission to delete this event.');
+    }
+    
+    if (apiError.code === 404) {
+      throw new Error('Event not found or has already been deleted.');
+    }
+    
+    console.error('Error deleting event:', error);
     throw error;
   }
 }
